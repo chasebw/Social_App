@@ -11,3 +11,7 @@ https://www.youtube.com/watch?v=JPT3bFIwJYA&list=PL55RiY5tL51oyA8euSROLjMFZbXaV7
 
 React Hooks:
 https://youtu.be/-MlNBTSg_Ww
+
+
+API Calls:
+https://reactjs.org/docs/faq-ajax.html
