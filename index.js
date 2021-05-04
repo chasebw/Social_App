@@ -1,9 +1,11 @@
 const express = require('express')
 const path = require('path')
+require('dotenv').config()
 const PORT = process.env.PORT || 5000
 
 //Routes
 const postRoutes = require('./routes/posts')
+const mongoConnect = require('./util/database').mongoConnect
 
 express()
   .use(express.json())
@@ -16,4 +18,11 @@ express()
   .get('/heroku', (req, res) => res.render('pages/index'))
   .get('/', (req, res) => res.sendFile(path.join(__dirname, 'build', 'index.html')))
   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+
+
+
+
+  mongoConnect( () => {
+    console.log("Connect to database");
+  })
 
