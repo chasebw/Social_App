@@ -33,6 +33,15 @@ exports.addPost = (req, res, next) => {
     }) 
 }
 
+exports.getPost = (req, res, next) => {
+    const postId = req.params.postId;
+    Post.findById(postId) 
+    .then(post => {
+        res.json({postId, post})
+    })
+    .catch(err => console.log(err))
+}
+
 exports.getPosts = (req, res, next) => {
 
     Post.fetchAll()

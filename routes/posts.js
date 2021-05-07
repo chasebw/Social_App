@@ -9,6 +9,8 @@ router.post('/testBackend', postController.testbackend)
 router.get('/all', postController.getPosts)
 
 router.post('/addPost', postController.addPost)
+
+router.get('/posts/:postId', postController.getPost)
   
 module.exports = router
     

@@ -13,30 +13,42 @@ class post {
         const db = getDb()
 
         return db.collection('posts')
-        .insertOne(this)
-        .then(result => {
-            console.log(result)
-        })
-        .catch(err => {
-            console.log(err)
-        })
+            .insertOne(this)
+            .then(result => {
+                console.log(result)
+            })
+            .catch(err => {
+                console.log(err)
+            })
     } // Save End
 
     static fetchAll() {
         const db = getDb()
         // Maybe use find().toArray();
-        // find() cursor
+        // find() cursor // We should use pagination?
         return db
-        .collection('posts')
-        .find()
-        .toArray()
-        .then(posts => {
-            console.log(posts)
-            return posts
+            .collection('posts')
+            .find()
+            .toArray()
+            .then(posts => {
+                console.log(posts)
+                return posts
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+
+    static findById(postId) {
+        const db = getDb();
+        return db.collection('posts')
+        .find({ _id: postId })
+        .next()
+        .then(post => {
+            console.log(post)
+            return post;
         })
-        .catch(err => {
-            console.log(err)
-        })
+        .catch(err => console.log(err))
     }
 }
 
