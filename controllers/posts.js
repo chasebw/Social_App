@@ -35,6 +35,8 @@ exports.addPost = (req, res, next) => {
 
 exports.getPost = (req, res, next) => {
     const postId = req.params.postId;
+    console.log(`Grabbing Single Post with ID ${postId}`)
+
     Post.findById(postId) 
     .then(post => {
         res.json({postId, post})

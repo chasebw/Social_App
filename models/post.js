@@ -1,3 +1,5 @@
+const mongodb = require('mongodb')
+
 // Import Function to Connect to Database
 const getDb = require('../util/database').getDb
 
@@ -39,10 +41,11 @@ class post {
             })
     }
 
+    // Note you must use the mongodb ObjectID because the value stored in the database is of that type
     static findById(postId) {
         const db = getDb();
         return db.collection('posts')
-        .find({ _id: postId })
+        .find({ _id: new mongodb.ObjectId(postId)})
         .next()
         .then(post => {
             console.log(post)
