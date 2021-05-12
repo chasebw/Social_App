@@ -4,24 +4,34 @@ const mongodb = require('mongodb')
 const getDb = require('../util/database').getDb
 
 class post {
-    constructor(user, content, time) {
+    constructor(user, content, time, id) {
         this.user = user;
         this.content = content;
-        this.time = time
+        this.time = time;
+        this._id = id ? new mongodb.ObjectId(id) : null;
         //Todo Add image url
     }
 
     save() {
         const db = getDb()
+        let dbOp;
+        if (this._id) {
+            // Update Product if we have the ID
+            dbOp = db.collection('posts').updateOne({_id: this._id }, {$set: this})
+        }
+        else
+        {
+            // Otherwise Add post
+            dbOp = db.collection('posts').insertOne(this);
+        }
 
-        return db.collection('posts')
-            .insertOne(this)
-            .then(result => {
-                console.log(result)
-            })
-            .catch(err => {
-                console.log(err)
-            })
+        return dbOp
+        .then(result => {
+            //console.log(result)
+        })
+        .catch(err => {
+            console.log(err)
+        })
     } // Save End
 
     static fetchAll() {
@@ -52,6 +62,17 @@ class post {
             return post;
         })
         .catch(err => console.log(err))
+    }
+
+    static deleteById(postId) {
+        const db = getDb();
+        return db.collection('posts').deleteOne({_id: new mongodb.ObjectId(postId)})
+        .then(result => {
+            console.log("Deleted Item")
+        })
+        .catch( err => {
+            console.log(err)
+        })
     }
 }
 

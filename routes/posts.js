@@ -11,6 +11,10 @@ router.get('/all', postController.getPosts)
 router.post('/addPost', postController.addPost)
 
 router.get('/:postId', postController.getPost)
+
+router.post('/editPost/:postId', postController.editPost)
+
+router.post('/deletePost', postController.deletePost)
   
 module.exports = router
     
