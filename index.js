@@ -5,8 +5,6 @@ const MongoDBStore = require('connect-mongodb-session')(session)
 const mongoose = require('mongoose')
 const User = require('./models/user')
 
-
-
 require('dotenv').config()
 const PORT = process.env.PORT || 5000
 

@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const { validationResult } = require('express-validator/check')
 
 const User = require('../models/user')
 
@@ -8,10 +9,24 @@ exports.postLogin = (req, res, next) => {
     const username = req.body.username
     const password = req.body.password
 
+    const errors = validationResult(req)
+    if(!errors.isEmpty())
+    {
+        return res.status(422).json({success: false,
+            action: "Login",
+            message: errors.array()[0].msg,
+            errors: errors.array()
+        })
+    }
+
     User.findOne({username: username})
     .then(user => {
         if (!user) {
-            return res.json({success: false, action: "Login", message: "Invalid username or password."})
+            return res.json({success: false,
+                action: "Login",
+                message: "Invalid username or password.",
+                errors: []
+            })
         }
         bcrypt
         .compare(password, user.password)
@@ -48,12 +63,17 @@ exports.postSignup = (req, res, next) => {
     const password = req.body.password;
     const confirmPassword = req.body.passwordConfirm;
 
-    User.findOne({username: username})
-    .then(userDoc => {
-        if (userDoc) {
-            return res.json({success:false, action: "signup", message: `This username is already in use [${username}].`})
-        }
-        return bcrypt.hash(password, 12)
+    const errors = validationResult(req)
+    if(!errors.isEmpty())
+    {
+        return res.status(422).json({success: false,
+            action: "signup",
+            message: errors.array()[0].msg,
+            errors: errors.array()
+        })
+    }
+
+        bcrypt.hash(password, 12)
         .then(hashedPassword => {
             const user = new User({
                 username: username,
@@ -65,8 +85,6 @@ exports.postSignup = (req, res, next) => {
         .then(result => {
            res.json({success: true, action: "signup"}) 
         })
-    })
-    
     .catch(err => {
         console.log(err)
     })
