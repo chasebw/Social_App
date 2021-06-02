@@ -15,6 +15,10 @@ const postSchema = new Schema({
     time: {
         type: String,
         required: true
+    },
+    page: {
+        type: String,
+        required: true
     }
 })
 

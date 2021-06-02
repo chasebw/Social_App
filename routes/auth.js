@@ -38,4 +38,24 @@ router.post('/signup',
 ],
 authController.postSignup)
 
+router.post('/changePassword',
+[ body('password', 'The Password must be at least 4 characters and be alphanumeric.').isLength({min:4}).isAlphanumeric().trim(),
+  body('confirmPassword').trim().custom((value, {req}) => {
+    if (value !== req.body.password)
+    {
+        throw new Error("Passwords must match.")
+    }
+    return true
+})
+],
+ authController.changePassword)
+
+router.post('/changeProfilePicture', authController.changeProfilePicture)
+
+router.post('/changeEmail',
+[check('email').isEmail().withMessage("Please Enter a Valid Email.").normalizeEmail()], 
+authController.changeEmail)
+
+router.post('/getUser', authController.getUser)
+
 module.exports = router;

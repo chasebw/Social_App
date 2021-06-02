@@ -20,6 +20,7 @@ exports.addPost = (req, res, next) => {
         return res.json({success: false, message: "No Valid User to retrieve post.", action: "Add Post"})
     }
     const content = req.body.content
+    const page = req.body.page
     const time = req.body.time
     const errors = validationResult(req)
 
@@ -28,7 +29,7 @@ exports.addPost = (req, res, next) => {
         return res.status(422).json({success:false, message: errors.array()[0].msg , errors: errors, action: "Add Post" })
     }
 
-    const post = new Post({user: req.user, content: content, time: time})
+    const post = new Post({user: req.user, content: content, time: time, page: page})
     .save()
     .then(result => {
         console.log("Created Post")
@@ -61,14 +62,11 @@ exports.getPost = (req, res, next) => {
 }
 
 exports.getPosts = (req, res, next) => {
-    if(!req.user)
-    {
-        return res.json({success: false, message: "No Valid User to retrieve posts"})
-    }
+    const page = req.body.page
 
-    Post.find()
-    .select('content time')
-    .populate('user', 'username')
+    Post.find({page:page})
+    .select('content time page')
+    .populate('user', 'username profilePicture')
     .then(posts => {
         console.log("Grabbing All Posts")
         console.log(posts)

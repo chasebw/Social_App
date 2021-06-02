@@ -8,7 +8,7 @@ const { check, body } = require('express-validator/check')
 
 // /posts/testBackend => POST 
 // router.post('/testBackend', postController.testbackend)
-router.get('/all', isAuth, postController.getPosts)
+router.post('/AllPosts', isAuth, postController.getPosts)
 
 router.post('/addPost',
 [
