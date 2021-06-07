@@ -62,11 +62,22 @@ exports.getPost = (req, res, next) => {
 }
 
 exports.getPosts = (req, res, next) => {
+    const NUMBER_PER_PAGE = 5
     const page = req.body.page
+    const pageNumber = req.body.pageNumber
 
-    Post.find({page:page})
-    .select('content time page')
-    .populate('user', 'username profilePicture')
+    let totalPosts
+
+
+    Post.find({page:page}).countDocuments().then(numPosts => {
+        console.log(numPosts)
+        totalPosts = numPosts
+        return Post.find({page:page})
+        .skip((pageNumber - 1) * NUMBER_PER_PAGE)
+        .limit(NUMBER_PER_PAGE)
+        .select('content time page')
+        .populate('user', 'username profilePicture')
+    })
     .then(posts => {
         console.log("Grabbing All Posts")
         console.log(posts)
@@ -78,7 +89,8 @@ exports.getPosts = (req, res, next) => {
                 return {...post._doc, isUserPost: false}
             }
         })
-        res.json({posts: newPosts, success: true})
+        console.log(totalPosts)
+        res.json({posts: newPosts, success: true, totalPosts:totalPosts})
     })
     .catch(err => {
         console.log(err);
