@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const { validationResult } = require('express-validator/check')
+const fileHelper = require('../util/file')
 
 const User = require('../models/user')
 
@@ -117,6 +118,9 @@ exports.changeProfilePicture = (req, res, next) => {
 
     User.findById(req.user._id)
     .then(user => {
+        if(user.profilePicture != "images/profile_default.png") {
+            fileHelper.deleteFile(user.profilePicture)
+        }
         user.profilePicture = newProfilePicture;
         user.save();
         return res.json({action: "ChangeProfile", success: true})
