@@ -24,7 +24,7 @@ router.post('/signup',
     .custom((value, { req }) => {
         return User.findOne({username: value}).then(userDoc => {
             if (userDoc) {
-                return Promise.reject(`This username is already in use [${value}].`)
+                return Promise.reject(`This username is already in use.`)
             }
     })
 }),

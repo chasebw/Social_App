@@ -42,6 +42,12 @@ express()
     storage: fileStorage,
     fileFilter: fileFilter
   }).single('profile_picture'))
+  .use((req,res,next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allows-Methods', 'GET, POST, PUT, PATCH, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    next()
+  })
   .use(express.static(path.join(__dirname, 'public')))
   .use('/images', express.static(path.join(__dirname, 'images')))
   .use(express.static(path.join(__dirname, 'build')))
