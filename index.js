@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 const User = require('./models/user')
 const multer = require('multer')
 
+
 require('dotenv').config()
 const PORT = process.env.PORT || 5000
 
@@ -15,22 +16,6 @@ const store = new MongoDBStore({
 })
 // May need to remove retry rewrites???? - See MongoDB Store Sessions
 
-const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => { cb(null,'./images') },
-  filename: (req, file, cb) => { cb(null, new Date().toISOString().replace(/:/g, '-') + "-" + file.originalname) }
-})
-
-const fileFilter = (req, file, cb) => {
-  if(file.mimetype === 'image/png' || file.mimetype == 'image/jpg' || file.mimetype == 'image/jpeg')
-  {
-    cb(null, true)
-  }
-  else 
-  {
-    cb(null, false)
-  }
-} 
-
 //Routes
 const postRoutes = require('./routes/posts')
 const authRoutes = require('./routes/auth')
@@ -38,16 +23,6 @@ const authRoutes = require('./routes/auth')
 express()
   .use(express.json())
   .use(express.urlencoded({extended:false}))
-  .use(multer({
-    storage: fileStorage,
-    fileFilter: fileFilter
-  }).single('profile_picture'))
-  .use((req,res,next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allows-Methods', 'GET, POST, PUT, PATCH, DELETE')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    next()
-  })
   .use(express.static(path.join(__dirname, 'public')))
   .use('/images', express.static(path.join(__dirname, 'images')))
   .use(express.static(path.join(__dirname, 'build')))

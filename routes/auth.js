@@ -2,6 +2,7 @@ const express = require('express')
 const authController = require('../controllers/auth')
 const { check, body } = require('express-validator/check')
 const User = require('../models/user')
+const multer = require('multer')
 
 const router = express.Router()
 
@@ -50,7 +51,29 @@ router.post('/changePassword',
 ],
  authController.changePassword)
 
-router.post('/changeProfilePicture', authController.changeProfilePicture)
+
+ const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => { cb(null,'../images') },
+    filename: (req, file, cb) => { cb(null, new Date().toISOString().replace(/:/g, '-') + "-" + file.originalname) }
+  })
+  
+  const fileFilter = (req, file, cb) => {
+    if(file.mimetype === 'image/png' || file.mimetype == 'image/jpg' || file.mimetype == 'image/jpeg')
+    {
+      cb(null, true)
+    }
+    else 
+    {
+      cb(null, false)
+    }
+  } 
+
+const pictureUpload = multer({
+    storage: fileStorage,
+    fileFilter: fileFilter
+  })
+
+router.post('/changeProfilePicture', pictureUpload.single("profile_picture"), authController.changeProfilePicture)
 
 router.post('/changeEmail',
 [check('email').isEmail().withMessage("Please Enter a Valid Email.").normalizeEmail()], 

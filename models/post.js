@@ -19,6 +19,10 @@ const postSchema = new Schema({
     page: {
         type: String,
         required: true
+    },
+    image: {
+        type: String,
+        required: false
     }
 })
 

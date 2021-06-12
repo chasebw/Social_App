@@ -1,5 +1,7 @@
 const Post = require('../models/post')
 const { validationResult } = require('express-validator/check')
+const fileHelper = require('../util/file')
+
 
 exports.testbackend = (req, res, next) => {
     console.log("Made it Test Backend Route")
@@ -13,6 +15,9 @@ exports.testbackend = (req, res, next) => {
 }
 
 exports.addPost = (req, res, next) => {
+
+    console.log("Form Data Guy")
+    console.log(JSON.stringify(req.body))
     console.log("Running ServerSide Add post")
 
     if(!req.user)
@@ -20,8 +25,17 @@ exports.addPost = (req, res, next) => {
         return res.json({success: false, message: "No Valid User to retrieve post.", action: "Add Post"})
     }
     const content = req.body.content
+    console.log("Content", content)
     const page = req.body.page
+    console.log("page", page)
     const time = req.body.time
+    const postImage = req.file?.path ? req.file.path : null
+    console.log("Post Image is", postImage)
+
+    // if (!postImage) {
+    //     return res.json({success: false, action: "Add Post", message: "file was not a valid Image"})
+    // }
+
     const errors = validationResult(req)
 
     if(!errors.isEmpty()) 
@@ -29,7 +43,7 @@ exports.addPost = (req, res, next) => {
         return res.status(422).json({success:false, message: errors.array()[0].msg , errors: errors, action: "Add Post" })
     }
 
-    const post = new Post({user: req.user, content: content, time: time, page: page})
+    const post = new Post({user: req.user, content: content, time: time, page: page, image: postImage})
     .save()
     .then(result => {
         console.log("Created Post")
@@ -52,7 +66,7 @@ exports.getPost = (req, res, next) => {
     console.log(`Grabbing Single Post with ID ${postId}`)
 
     Post.findById(postId)
-    .select('content time')
+    .select('content time image')
     .populate('user', 'username')
     .then(post => {
         res.json({postId, post})
@@ -75,7 +89,7 @@ exports.getPosts = (req, res, next) => {
         return Post.find({page:page})
         .skip((pageNumber - 1) * NUMBER_PER_PAGE)
         .limit(NUMBER_PER_PAGE)
-        .select('content time page')
+        .select('content time page image')
         .populate('user', 'username profilePicture')
     })
     .then(posts => {
@@ -100,26 +114,33 @@ exports.getPosts = (req, res, next) => {
 
 exports.editPost = (req, res, next) => {
 
-    if(!req.user)
-    {
-        return res.json({success: false, message: "No Valid User to Edit post"})
-    }
-
     const errors = validationResult(req)
     if(!errors.isEmpty()) 
     {
         return res.status(422).json({success:false, message: errors.array()[0].msg , errors: errors, action: "Edit Post" })
     }
 
-    const updatedUser = req.body.user;
     const updatedContent = req.body.content;
     const updatedTime = req.body.time;
     const _id = req.params.postId;
+    const postImage = req.file
+  
+
     
     Post.findById(_id).then(post => {
         post.content = updatedContent
         post.time = updatedTime
-        return post.save()
+        if (postImage) {
+            if(post.image !== null)
+            {
+                fileHelper.deleteFile(post.image)
+            }
+            post.image = postImage.path
+            return post.save()
+        }
+        else {
+            console.log("image was null")
+        }
     })
     .then(result => {
         console.log("Updated Post")
@@ -139,7 +160,15 @@ exports.deletePost = (req, res, next) => {
     }
 
     const postId = req.body.id;
-    Post.findByIdAndRemove(postId)
+
+    Post.findById(postId).then(post => {
+        if(!post) {
+            return next(new Error("Post not found"))
+        }
+        fileHelper.deleteFile(post.image)
+        return Post.findByIdAndRemove(postId)
+
+    })
     .then(() => {
         console.log("Deleted Product")
         res.json({"success": true})
