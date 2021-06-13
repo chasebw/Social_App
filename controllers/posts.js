@@ -118,7 +118,6 @@ exports.editPost = (req, res, next) => {
     }
 
     const updatedContent = req.body.content;
-    console.log("Updated Content: ", updatedContent)
     const updatedTime = req.body.time;
     const _id = req.params.postId;
     const postImage = req.file

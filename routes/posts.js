@@ -16,11 +16,8 @@ router.post('/AllPosts', isAuth, postController.getPosts)
 const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => { 
       
-      // TODO add images to folder
-      console.log("Storing for this page: ____")
-      console.log(req.body.page)
-      const page = req.body.page
-    cb(null,`./images/${page}`) },
+    // TODO add images to folder
+    cb(null,`./images`) },
     filename: (req, file, cb) => { cb(null, new Date().toISOString().replace(/:/g, '-') + "-" + file.originalname) }
   })
   
@@ -51,8 +48,8 @@ postController.addPost)
 router.get('/:postId', isAuth, postController.getPost)
 
 router.post('/editPost/:postId',
-pictureUpload.single("postImage"),
 isAuth,
+pictureUpload.single("postImage"),
 [
   body('content', "Your post must be at least 5 characters.").isString().isLength({min:5}).trim()
 ], 
