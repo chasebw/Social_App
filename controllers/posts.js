@@ -84,17 +84,15 @@ exports.getPosts = (req, res, next) => {
 
 
     Post.find({page:page}).countDocuments().then(numPosts => {
-        console.log(numPosts)
         totalPosts = numPosts
         return Post.find({page:page})
+        .sort({_id:-1})
         .skip((pageNumber - 1) * NUMBER_PER_PAGE)
         .limit(NUMBER_PER_PAGE)
         .select('content time page image')
         .populate('user', 'username profilePicture')
     })
     .then(posts => {
-        console.log("Grabbing All Posts")
-        console.log(posts)
         const newPosts = posts.map(post => {
             if (JSON.stringify(req.user._id) === JSON.stringify(post.user._id)) {
                 return {...post._doc, isUserPost: true}
@@ -103,7 +101,6 @@ exports.getPosts = (req, res, next) => {
                 return {...post._doc, isUserPost: false}
             }
         })
-        console.log(totalPosts)
         res.json({posts: newPosts, success: true, totalPosts:totalPosts})
     })
     .catch(err => {
@@ -121,6 +118,7 @@ exports.editPost = (req, res, next) => {
     }
 
     const updatedContent = req.body.content;
+    console.log("Updated Content: ", updatedContent)
     const updatedTime = req.body.time;
     const _id = req.params.postId;
     const postImage = req.file
@@ -139,12 +137,12 @@ exports.editPost = (req, res, next) => {
             return post.save()
         }
         else {
-            console.log("image was null")
+            return post.save()
         }
     })
     .then(result => {
         console.log("Updated Post")
-        res.json({success: true, result, message: "Edit Post was successful"})
+        res.json({success: true, result, message: "Edit Post was successful", action: "Edit Post"})
     })
     .catch(err => {
         console.log(err)
@@ -156,7 +154,7 @@ exports.deletePost = (req, res, next) => {
 
     if(!req.user)
     {
-        return res.json({success: false, message: "No Valid User to Delete post"})
+        return res.json({success: false, message: "No Valid User to Delete post", action:"Delete Post"})
     }
 
     const postId = req.body.id;
@@ -165,14 +163,38 @@ exports.deletePost = (req, res, next) => {
         if(!post) {
             return next(new Error("Post not found"))
         }
-        fileHelper.deleteFile(post.image)
+        if (post.image)
+        {
+            fileHelper.deleteFile(post.image)
+        }
         return Post.findByIdAndRemove(postId)
 
     })
     .then(() => {
         console.log("Deleted Product")
-        res.json({"success": true})
+        res.json({"success": true, message: "Delete Post Was Successful", action: "Delete Post"})
     })
     .catch(err => console.log(err))
 
+}
+
+exports.getPictures = (req, res, next) => {
+    const NumberOfPictures = 4
+    const page = req.body.page
+
+    Post.find({page:page}).countDocuments()
+    .then(numPosts => {
+        let random = Math.floor(Math.random * numPosts)
+        return Post.find({page:page})
+        .skip(random)
+        .limit(NumberOfPictures)
+        .select('image')
+    })
+    .then(posts => {
+        res.json({success:true, posts:posts})
+    })
+    .catch(err => {
+        console.log(err);
+        res.json({posts:null, success: false})
+    }) 
 }

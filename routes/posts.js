@@ -15,7 +15,12 @@ router.post('/AllPosts', isAuth, postController.getPosts)
 
 const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => { 
-    cb(null,`./images`) },
+      
+      // TODO add images to folder
+      console.log("Storing for this page: ____")
+      console.log(req.body.page)
+      const page = req.body.page
+    cb(null,`./images/${page}`) },
     filename: (req, file, cb) => { cb(null, new Date().toISOString().replace(/:/g, '-') + "-" + file.originalname) }
   })
   
@@ -54,6 +59,7 @@ isAuth,
 postController.editPost)
 
 router.post('/deletePost', isAuth, postController.deletePost)
+router.post('/getPictures', isAuth, postController.getPictures)
   
 module.exports = router
     
